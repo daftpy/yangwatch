@@ -4,7 +4,7 @@ from django.core.validators import URLValidator
 # Create your models here.
 class NewsArticle(models.Model):
     title = models.CharField(max_length=200)
-    url = models.TextField(validators=[URLValidator()])
+    url = models.TextField(unique=True, validators=[URLValidator()])
     text = models.TextField()
     website = models.CharField(max_length=200, blank=True, null=True)
     # Not all articles have explicit publish dates

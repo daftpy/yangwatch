@@ -23,7 +23,7 @@ class Query(object):
 
         if keyword is not None:
             print('keyword found')
-            return NewsArticle.objects.filter(text__icontains=keyword)
+            return NewsArticle.objects.filter(text__icontains=keyword).filter(visible=True)
 
         if id is not None:
             print(id)
