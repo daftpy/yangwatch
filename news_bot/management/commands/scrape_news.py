@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from news_bot.models import NewsArticle as NewsArticle
+from django.db import IntegrityError
 import requests
 import json
 import os
@@ -27,14 +28,17 @@ class Command(BaseCommand):
             raise CommandError('Error')
 
         for article in json_data:
-            NewsArticle.objects.get_or_create(
-                title=article['title'],
-                url=article['url'],
-                text=article['text'],
-                website=safeget(article, 'website', 'name'),
-                publish_date=article.get('publishDate'),
-                discover_date=article['discoverDate'],
-                sentiment_score=safeget(article, 'metadata', 'finSentiment', 'sentiment'),
-                read_time=safeget(article, 'metadata', 'readTime', 'seconds')
-                #sentiment_score=article.get('metadata').get('finSentiment').get('sentiment')
-            )
+            try:
+                NewsArticle.objects.get_or_create(
+                    title=article['title'],
+                    url=article['url'],
+                    text=article['text'],
+                    website=safeget(article, 'website', 'name'),
+                    publish_date=article.get('publishDate'),
+                    discover_date=article['discoverDate'],
+                    sentiment_score=safeget(article, 'metadata', 'finSentiment', 'sentiment'),
+                    read_time=safeget(article, 'metadata', 'readTime', 'seconds')
+                    #sentiment_score=article.get('metadata').get('finSentiment').get('sentiment')
+                )
+            except IntegrityError as e:
+                print('Integrity Error')
