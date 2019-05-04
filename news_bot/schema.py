@@ -1,11 +1,15 @@
 import graphene
 
 from graphene_django.types import DjangoObjectType
-from .models import NewsArticle
+from .models import NewsArticle, Author, AuthorEmail
 
 class NewsArticleType(DjangoObjectType):
     class Meta:
         model = NewsArticle
+
+class AuthorType(DjangoObjectType):
+    class Meta:
+        model = Author
 
 
 class Query(object):

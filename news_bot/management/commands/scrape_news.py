@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
-from news_bot.models import NewsArticle as NewsArticle
+from news_bot.models import NewsArticle, Author, AuthorEmail
 from django.db import IntegrityError
-import requests
-import json
+from eventregistry import EventRegistry, QueryArticlesIter
 import os
 
+apikey = os.getenv('NEWS_KEY')
 
 def safeget(dct, *keys):
     for key in keys:
@@ -16,29 +16,37 @@ def safeget(dct, *keys):
 
 class Command(BaseCommand):
     help = 'Scrape the current news for yang gang'
-    api_key = os.getenv('NEWS_KEY')    
-    
 
     def handle(self, *args, **options):
-        try:
-            response = requests.get("https://api.newsriver.io/v2/search?query=text%3A%20%22Andrew%20Yang%22&sortBy=discoverDate&sortOrder=DESC&limit=100", headers={"Authorization": api_key})
-            json_data = json.loads(response.text)
-            
-        except:
-            raise CommandError('Error')
+        er = EventRegistry(apiKey=apikey)
+        q = QueryArticlesIter(
+            keywords='Andrew Yang',
+            keywordsLoc='body, title',
+        )
 
-        for article in json_data:
+        for article in q.execQuery(er, sortBy='date', maxItems=10):
             try:
-                NewsArticle.objects.get_or_create(
+                existing_article, new_article = NewsArticle.objects.get_or_create(
                     title=article['title'],
                     url=article['url'],
-                    text=article['text'],
-                    website=safeget(article, 'website', 'name'),
-                    publish_date=article.get('publishDate'),
-                    discover_date=article['discoverDate'],
-                    sentiment_score=safeget(article, 'metadata', 'finSentiment', 'sentiment'),
-                    read_time=safeget(article, 'metadata', 'readTime', 'seconds')
-                    #sentiment_score=article.get('metadata').get('finSentiment').get('sentiment')
+                    text=article['body'],
+                    website=safeget(article, 'source', 'uri'),
+                    publish_date=article.get('dateTime'),
                 )
+                for author in article['authors']:
+                    existing_author, new_author = Author.objects.get_or_create(
+                        author_name = author.get('name')
+                    )
+                    existing_email, new_email = AuthorEmail.objects.get_or_create(
+                        author_email = author.get('uri'),
+                        author = existing_author
+                    )
+                    if new_article:
+                        existing_article.authors.add(existing_author)
+                        existing_article.save()
+                        print(existing_author, ' added to ', existing_article)
+                    if existing_article:
+                        print('exists')
             except IntegrityError as e:
-                print('Integrity Error')
+                print('Integrity Error:', e)
+
