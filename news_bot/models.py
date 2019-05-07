@@ -39,7 +39,7 @@ class NewsArticle(models.Model):
     visible = models.BooleanField(default=False)
 
     reviewed = models.BooleanField(default=False)
-    
+
     # Removed read_time due to new news api
     # read_time = models.IntegerField(blank=True, null=True)
 
@@ -47,4 +47,3 @@ class NewsArticle(models.Model):
         if self.website:
             return self.website + ' ' + self.title
         return self.title
-
