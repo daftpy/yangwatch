@@ -18,6 +18,17 @@ class NewsArticleAdmin(admin.ModelAdmin):
     actions = [apply_reviewed, ]
 
 
+class EmailInline(admin.TabularInline):
+    model = AuthorEmail
+
+
+class AuthorAdmin(admin.ModelAdmin):
+    search_fields = ('author_name',)
+    inlines = [
+        EmailInline,
+    ]
+
+
 admin.site.register(NewsArticle, NewsArticleAdmin)
-admin.site.register(Author)
+admin.site.register(Author, AuthorAdmin)
 admin.site.register(AuthorEmail)

@@ -19,27 +19,17 @@ class AuthorEmail(models.Model):
 
 class NewsArticle(models.Model):
     title = models.CharField(max_length=200)
-
     url = models.TextField(unique=True, validators=[URLValidator()])
-
     text = models.TextField()
-
     website = models.CharField(max_length=200, blank=True, null=True)
-
     publish_date = models.DateTimeField(blank=True, null=True)
-
     # Removed due to new news api
     # discover_date = models.DateTimeField()
-
     # Removed due to news api but will keep in model for future use
     sentiment_score = models.FloatField(blank=True, null=True)
-
     authors = models.ManyToManyField(Author, blank=True, null=True)
-
     visible = models.BooleanField(default=False)
-
     reviewed = models.BooleanField(default=False)
-
     # Removed read_time due to new news api
     # read_time = models.IntegerField(blank=True, null=True)
 
@@ -47,3 +37,9 @@ class NewsArticle(models.Model):
         if self.website:
             return self.website + ' ' + self.title
         return self.title
+
+
+class ArticleSubmission(models.Model):
+    url = models.TextField(unique=True, validators=[URLValidator()])
+    user_email = models.EmailField()
+    message = models.TextField()

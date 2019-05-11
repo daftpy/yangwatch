@@ -23,3 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True)))
 ]
+
+admin.site.site_header = 'YangWatch Admin Panel'
+admin.site.site_title = 'YangWatch'
